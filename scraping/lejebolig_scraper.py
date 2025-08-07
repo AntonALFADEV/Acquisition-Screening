@@ -15,13 +15,19 @@ def fetch_lejeboliger(postnr, max_pages=1):
         url = f"{BASE_URL}?page={page}&search=1&zip={postnr}"
         response = requests.get(url, headers=headers)
 
-        # Hvis der er en fejl i forespørgslen, stop loopet
         if response.status_code != 200:
-            print(f"Fejl ved forespørgsel til {url}: Statuskode {response.status_code}")
+            print(f"Fejl: {response.status_code}")
             break
 
         soup = BeautifulSoup(response.text, "lxml")
+
+        # DEBUG: Print første 500 tegn af HTML'en i loggen
+        print("------------ HTML start ------------")
+        print(response.text[:500])
+        print("------------ HTML slut -------------")
+
         listings = soup.find_all("div", class_="listing-card")
+        print(f"Antal fundet listings: {len(listings)}")  # DEBUG
 
         for listing in listings:
             try:
