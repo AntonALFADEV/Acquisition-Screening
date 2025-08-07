@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
-from scraping.lejebolig_scraper import fetch_lejeboliger  # IMPORT SKAL VÆRE HER
+from scraping.lejebolig_scraper import fetch_lejeboliger
 
 st.set_page_config(page_title="Acquisition Screening App", layout="wide")
 st.title("🏗️ Acquisition Screening App")
@@ -76,3 +76,4 @@ elif module == "🧠 AI-analyse af lokalplan / kommuneplan":
             st.write(summary)
         except Exception as e:
             st.error(f"Fejl under PDF-analyse: {e}")
+
