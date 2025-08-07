@@ -6,7 +6,7 @@ import streamlit as st
 from scraping.boligportal_scraper import fetch_boligportal
 
 st.set_page_config(page_title="Acquisition Screening App", layout="wide")
-st.title("🏗️ Acquisition Screening App")
+st.title("Acquisition Screening App")
 
 # ----------------------------
 # Sidebar menu med knapper
@@ -88,3 +88,4 @@ elif module == "🧠 AI-analyse af lokalplan / kommuneplan":
             st.write(summary)
         except Exception as e:
             st.error(f"Fejl under PDF-analyse: {e}")
+
