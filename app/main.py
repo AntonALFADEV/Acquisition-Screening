@@ -3,34 +3,34 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
-from scraping.lejebolig_scraper import fetch_lejeboliger
+from scraping.boligportal_scraper import fetch_boligportal  # Boligportal scraper
 
 st.set_page_config(page_title="Acquisition Screening App", layout="wide")
 st.title("🏗️ Acquisition Screening App")
 
-# Sidebar navigation
+# Sidebar navigation (radio i stedet for dropdown)
 st.sidebar.title("Moduler")
-module = st.sidebar.selectbox("Vælg modul", [
+module = st.sidebar.radio("Vælg modul", [
     "📦 Boligdata scraping",
     "📈 Excel-analyse (Resights / ReData)",
     "🧠 AI-analyse af lokalplan / kommuneplan"
 ])
 
 # =======================
-# 📦 MODUL 1: SCRAPING
+# 📦 MODUL 1: SCRAPING (Boligportal)
 # =======================
 if module == "📦 Boligdata scraping":
     st.header("📦 Scraping af boligdata")
-    st.write("Hent boligdata fra fx lejebolig.dk – flere portaler kommer snart.")
+    st.write("Hent boligdata fra Boligportal baseret på postnummer.")
 
     postnr = st.text_input("Indtast postnummer", value="2300")
 
-    if st.button("Start scraping (lejebolig.dk)"):
+    if st.button("Start scraping (boligportal.dk)"):
         try:
             with st.spinner("Henter data..."):
-                df = fetch_lejeboliger(postnr)
+                df = fetch_boligportal(postnr)
                 if not df.empty:
-                    st.success(f"{len(df)} boliger hentet for postnummer {postnr}")
+                    st.success(f"{len(df)} boliger hentet fra Boligportal for postnummer {postnr}")
                     st.dataframe(df)
                 else:
                     st.warning("Ingen resultater fundet.")
@@ -76,4 +76,3 @@ elif module == "🧠 AI-analyse af lokalplan / kommuneplan":
             st.write(summary)
         except Exception as e:
             st.error(f"Fejl under PDF-analyse: {e}")
-
