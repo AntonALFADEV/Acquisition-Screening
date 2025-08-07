@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-BASE_URL = "https://www.lejebolig.dk/lejebolig"
+BASE_URL = "https://www.lejebolig.dk"
 
 def fetch_lejeboliger(postnr, max_pages=1):
     results = []
@@ -31,3 +31,4 @@ def fetch_lejeboliger(postnr, max_pages=1):
                 continue
 
     return pd.DataFrame(results)
+
