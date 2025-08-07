@@ -3,22 +3,34 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
-from scraping.boligportal_scraper import fetch_boligportal  # Boligportal scraper
+from scraping.boligportal_scraper import fetch_boligportal
 
 st.set_page_config(page_title="Acquisition Screening App", layout="wide")
-st.title("Acquisition Screening App")
+st.title("🏗️ Acquisition Screening App")
 
-# Sidebar navigation (radio i stedet for dropdown)
+# ----------------------------
+# Sidebar menu med knapper
+# ----------------------------
 st.sidebar.title("Moduler")
-module = st.sidebar.radio("Vælg modul", [
-    "📦 Boligdata scraping",
-    "📈 Excel-analyse (Resights / ReData)",
-    "🧠 AI-analyse af lokalplan / kommuneplan"
-])
 
-# =======================
-# 📦 MODUL 1: SCRAPING (Boligportal)
-# =======================
+# Gem valgt modul i session state
+if "selected_module" not in st.session_state:
+    st.session_state.selected_module = "📦 Boligdata scraping"
+
+if st.sidebar.button("📦 Boligdata scraping"):
+    st.session_state.selected_module = "📦 Boligdata scraping"
+
+if st.sidebar.button("📈 Excel-analyse (Resights / ReData)"):
+    st.session_state.selected_module = "📈 Excel-analyse (Resights / ReData)"
+
+if st.sidebar.button("🧠 AI-analyse af lokalplan / kommuneplan"):
+    st.session_state.selected_module = "🧠 AI-analyse af lokalplan / kommuneplan"
+
+module = st.session_state.selected_module
+
+# ----------------------------
+# MODUL 1: SCRAPING
+# ----------------------------
 if module == "📦 Boligdata scraping":
     st.header("📦 Scraping af boligdata")
     st.write("Hent boligdata fra Boligportal baseret på postnummer.")
@@ -37,9 +49,9 @@ if module == "📦 Boligdata scraping":
         except Exception as e:
             st.error(f"Fejl under scraping: {e}")
 
-# =======================
-# 📈 MODUL 2: EXCEL-ANALYSE
-# =======================
+# ----------------------------
+# MODUL 2: EXCEL-ANALYSE
+# ----------------------------
 elif module == "📈 Excel-analyse (Resights / ReData)":
     st.header("📈 Analyse af Excel-data")
     st.write("Upload Excel-filer fra Resights eller ReData.")
@@ -58,9 +70,9 @@ elif module == "📈 Excel-analyse (Resights / ReData)":
         except Exception as e:
             st.error(f"Fejl under Excel-analyse: {e}")
 
-# =======================
-# 🧠 MODUL 3: PDF-AI
-# =======================
+# ----------------------------
+# MODUL 3: PDF-AI
+# ----------------------------
 elif module == "🧠 AI-analyse af lokalplan / kommuneplan":
     st.header("🧠 Upload PDF for AI-analyse")
     st.write("Upload en kommuneplan eller lokalplan i PDF-format og få en AI-opsummering.")
@@ -76,4 +88,3 @@ elif module == "🧠 AI-analyse af lokalplan / kommuneplan":
             st.write(summary)
         except Exception as e:
             st.error(f"Fejl under PDF-analyse: {e}")
-
