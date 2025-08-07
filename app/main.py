@@ -20,11 +20,11 @@ if "selected_module" not in st.session_state:
 if st.sidebar.button("📦 Boligdata scraping"):
     st.session_state.selected_module = "📦 Boligdata scraping"
 
-if st.sidebar.button("📈 Excel-analyse"):
-    st.session_state.selected_module = "📈 Excel-analyse"
+if st.sidebar.button("📈 Excel-analyse (Resights / ReData)"):
+    st.session_state.selected_module = "📈 Excel-analyse (Resights / ReData)"
 
-if st.sidebar.button("🧠 Plan analyse"):
-    st.session_state.selected_module = "🧠 Plan analyse"
+if st.sidebar.button("🧠 AI-analyse af lokalplan / kommuneplan"):
+    st.session_state.selected_module = "🧠 AI-analyse af lokalplan / kommuneplan"
 
 module = st.session_state.selected_module
 
@@ -88,6 +88,3 @@ elif module == "🧠 AI-analyse af lokalplan / kommuneplan":
             st.write(summary)
         except Exception as e:
             st.error(f"Fejl under PDF-analyse: {e}")
-
-
-
