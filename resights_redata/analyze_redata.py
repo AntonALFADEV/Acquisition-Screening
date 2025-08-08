@@ -26,7 +26,6 @@ def analyze_redata(file):
         labels={"Leje/m2": "Leje pr. m²"},
         hover_data=["Opførelsesår"],
         trendline="ols",
-        trendline_options=dict(frac=0.3)
     )
 
     # Beregninger
