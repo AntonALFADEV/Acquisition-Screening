@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 
 def analyze_excel(file):
-    # Læs faner
+    # Læs data
     df_stam = pd.read_excel(file, sheet_name="Stamdata")
     df_enh = pd.read_excel(file, sheet_name="Enheder")
 
@@ -10,14 +10,14 @@ def analyze_excel(file):
     df_stam = df_stam[["Handels-ID", "Handelsdato", "Pris pr. m2 (enhedsareal)"]]
     df_enh = df_enh[["Handels-ID", "Antal værelser", "Areal (enhed)"]]
 
-    # Merge og rens
+    # Merge
     df = pd.merge(df_stam, df_enh, on="Handels-ID", how="left")
     df = df.dropna(subset=["Handelsdato", "Pris pr. m2 (enhedsareal)", "Antal værelser", "Areal (enhed)"])
     df["Handelsdato"] = pd.to_datetime(df["Handelsdato"])
     df["Antal værelser"] = df["Antal værelser"].astype(str)
     df["År"] = df["Handelsdato"].dt.year
 
-    # Plot med trendlinje
+    # Scatterplot med trendlinje
     fig = px.scatter(
         df,
         x="Handelsdato",
@@ -30,20 +30,21 @@ def analyze_excel(file):
         trendline_options=dict(frac=0.3)
     )
 
-    # Gennemsnit (samlet)
+    # Gennemsnit
     total_avg = df["Pris pr. m2 (enhedsareal)"].mean()
 
-    # Gennemsnit pr. antal værelser
+    # Gennemsnit pr. værelser
     avg_by_rooms = df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
-    # Gruppér efter størrelses-segment
+    # Segmenter efter størrelse
     bins = [0, 50, 75, 100, float("inf")]
     labels = ["0–50 m²", "51–75 m²", "76–100 m²", "100+ m²"]
     df["Størrelsessegment"] = pd.cut(df["Areal (enhed)"], bins=bins, labels=labels)
 
     avg_by_size = df.groupby("Størrelsessegment")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
-    # Årlige gennemsnit
+    # Gennemsnit pr. år
     avg_by_year = df.groupby("År")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
+    # Returner ALLE 5 ting
     return fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year
