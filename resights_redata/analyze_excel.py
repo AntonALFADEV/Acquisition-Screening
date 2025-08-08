@@ -7,8 +7,8 @@ def analyze_excel(file):
     df_enh = pd.read_excel(file, sheet_name="Enheder")
 
     # Vælg relevante kolonner
-    df_stam = df_stam[["Handels-ID", "Handelsdato", "Pris pr. m2 (enhedsareal)"]]
-    df_enh = df_enh[["Handels-ID", "Antal værelser", "Enhedsareal"]]
+    df_stam = df_stam[["Handels-ID", "Handelsdato", "Pris pr. m2 (enhedsareal)", "Enhedsareal"]]
+    df_enh = df_enh[["Handels-ID", "Antal værelser"]]
 
     # Merge
     df = pd.merge(df_stam, df_enh, on="Handels-ID", how="left")
@@ -47,3 +47,4 @@ def analyze_excel(file):
     avg_by_year = df.groupby("År")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
     return fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year
+
