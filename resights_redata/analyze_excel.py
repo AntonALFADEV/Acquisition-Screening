@@ -27,7 +27,7 @@ def analyze_excel(file):
             title="Pris pr. m² over tid – farvet efter antal værelser",
             labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
             hover_data=["Enhedsareal"],
-            trendline="lowess",
+            trendline="ols",
             trendline_options=dict(frac=0.3)
         )
 
@@ -45,3 +45,4 @@ def analyze_excel(file):
 
     else:
         raise ValueError("Excel-arket ser ikke ud til at komme fra Resights (mangler 'Stamdata' og 'Enheder').")
+
