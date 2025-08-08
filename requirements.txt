@@ -9,3 +9,4 @@ plotly
 statsmodels
 PyMuPDF
 openai
+openai>=1.0.0
