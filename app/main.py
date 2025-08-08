@@ -13,7 +13,6 @@ st.title("Acquisition Screening App")
 # ----------------------------
 st.sidebar.title("Moduler")
 
-# Gem valgt modul i session state
 if "selected_module" not in st.session_state:
     st.session_state.selected_module = "📦 Boligdata scraping"
 
@@ -50,11 +49,11 @@ if module == "📦 Boligdata scraping":
             st.error(f"Fejl under scraping: {e}")
 
 # ----------------------------
-# MODUL 2: EXCEL-ANALYSE
+# MODUL 2: EXCEL-ANALYSE (Resights / ReData)
 # ----------------------------
 elif module == "📈 Excel-analyse (Resights / ReData)":
-    st.header("📈 Analyse af Excel-data")
-    st.write("Upload Excel-filer fra Resights eller ReData.")
+    st.header("📈 Analyse af Resights / ReData Excel-data")
+    st.write("Upload Excel-filer fra Resights – ejerboliger i fast format.")
 
     uploaded_file = st.file_uploader("Upload Excel-fil", type=["xlsx"])
 
@@ -62,11 +61,11 @@ elif module == "📈 Excel-analyse (Resights / ReData)":
         try:
             from resights_redata.analyze_excel import analyze_excel
             st.success("Fil uploadet – analyserer...")
-            df = analyze_excel(uploaded_file)
-            if not df.empty:
-                st.dataframe(df)
-            else:
-                st.warning("Ingen data fundet i filen.")
+
+            # Returnerer plot i stedet for dataframe
+            fig = analyze_excel(uploaded_file)
+            st.plotly_chart(fig, use_container_width=True)
+
         except Exception as e:
             st.error(f"Fejl under Excel-analyse: {e}")
 
