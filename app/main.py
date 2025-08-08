@@ -49,7 +49,7 @@ if module == "📦 Boligdata scraping":
             st.error(f"Fejl under scraping: {e}")
 
 # ----------------------------
-# MODUL 2: EXCEL-ANALYSE (Resights / ReData)
+# MODUL 2: EXCEL-ANALYSE
 # ----------------------------
 elif module == "📈 Excel-analyse (Resights / ReData)":
     st.header("📈 Analyse af Resights / ReData Excel-data")
@@ -62,9 +62,23 @@ elif module == "📈 Excel-analyse (Resights / ReData)":
             from resights_redata.analyze_excel import analyze_excel
             st.success("Fil uploadet – analyserer...")
 
-            # Returnerer plot i stedet for dataframe
-            fig = analyze_excel(uploaded_file)
+            fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year = analyze_excel(uploaded_file)
+
             st.plotly_chart(fig, use_container_width=True)
+
+            # Statistikvisning
+            st.subheader("📊 Statistik")
+
+            st.metric("Gennemsnitlig pris pr. m² (alle boliger)", f"{total_avg:,.0f} kr.")
+
+            st.markdown("**Gennemsnit pr. antal værelser:**")
+            st.dataframe(avg_by_rooms, use_container_width=True)
+
+            st.markdown("**Gennemsnit pr. størrelsessegment:**")
+            st.dataframe(avg_by_size, use_container_width=True)
+
+            st.markdown("**Årlige gennemsnitspriser:**")
+            st.dataframe(avg_by_year, use_container_width=True)
 
         except Exception as e:
             st.error(f"Fejl under Excel-analyse: {e}")
