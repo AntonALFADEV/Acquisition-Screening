@@ -16,13 +16,13 @@ st.title("Acquisition Screening App")
 st.sidebar.title("Moduler")
 
 if "selected_module" not in st.session_state:
-    st.session_state.selected_module = "📈 Excel-analyse (Resights / ReData)"
+    st.session_state.selected_module = "🏠 Ejerboligpriser"
 
-if st.sidebar.button("📈 Excel-analyse (Resights / ReData)"):
-    st.session_state.selected_module = "📈 Excel-analyse (Resights / ReData)"
+if st.sidebar.button("🏠 Ejerboligpriser"):
+    st.session_state.selected_module = "🏠 Ejerboligpriser"
 
-if st.sidebar.button("📊 Excel-analyse (ReData – lejeniveauer)"):
-    st.session_state.selected_module = "📊 Excel-analyse (ReData – lejeniveauer)"
+if st.sidebar.button("🏢 Lejeboligpriser"):
+    st.session_state.selected_module = "🏢 Lejeboligpriser"
 
 if st.sidebar.button("🧐 AI-analyse af lokalplan / kommuneplan"):
     st.session_state.selected_module = "🧐 AI-analyse af lokalplan / kommuneplan"
@@ -30,20 +30,19 @@ if st.sidebar.button("🧐 AI-analyse af lokalplan / kommuneplan"):
 module = st.session_state.selected_module
 
 # ----------------------------
-# MODUL 1: EXCEL-ANALYSE RESIGHTS
+# MODUL 1: RESIGHTS – Ejerboligpriser
 # ----------------------------
-if module == "📈 Excel-analyse (Resights / ReData)":
-    st.header("📈 Analyse af Resights / ReData Excel-data")
+if module == "🏠 Ejerboligpriser":
+    st.header("🏠 Analyse af ejerboligpriser")
     st.write("Upload Excel-filer fra Resights – ejerboliger i fast format.")
 
-    uploaded_file = st.file_uploader("Upload Excel-fil", type=["xlsx"], key="resights")
+    uploaded_file = st.file_uploader("Upload Excel-fil", type=["xlsx"], key="ejerboliger")
 
     if uploaded_file:
         try:
             st.success("Fil uploadet – analyserer...")
             df_full, fig_base, total_avg, avg_by_rooms, avg_by_size, avg_by_year = analyze_excel(uploaded_file)
 
-            # Filtrér år
             available_years = sorted(df_full["År"].dropna().unique())
             selected_years = st.multiselect("Vælg år", options=available_years, default=available_years)
 
@@ -87,11 +86,11 @@ if module == "📈 Excel-analyse (Resights / ReData)":
             st.error(f"Fejl under Excel-analyse: {e}")
 
 # ----------------------------
-# MODUL 2: EXCEL-ANALYSE REDATA
+# MODUL 2: REDATA – Lejeboligpriser
 # ----------------------------
-elif module == "📊 Excel-analyse (ReData – lejeniveauer)":
-    st.header("📊 Analyse af ReData-lejedata")
-    st.write("Upload Excel-fil fra ReData – lejeniveauer med kolonnerne 'Areal', 'Leje/m2', 'Antal værelser', og 'Opførelsesår'.")
+elif module == "🏢 Lejeboligpriser":
+    st.header("🏢 Analyse af lejeboligpriser")
+    st.write("Upload Excel-filer fra ReData – lejeboliger i fast format.")
 
     uploaded_file = st.file_uploader("Upload ReData Excel-fil", type=["xlsx"], key="redata")
 
@@ -124,7 +123,7 @@ elif module == "🧐 AI-analyse af lokalplan / kommuneplan":
     st.header("🧐 Upload PDF for AI-analyse")
     st.write("Upload en kommuneplan eller lokalplan i PDF-format og få en AI-opsummering.")
 
-    uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"])
+    uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"], key="pdf")
 
     if uploaded_pdf:
         try:
