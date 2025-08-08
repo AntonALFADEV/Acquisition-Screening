@@ -1,84 +1,103 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import streamlit as st
 import pandas as pd
-import plotly.express as px
+from resights_redata.analyze_excel import analyze_excel
 
-def analyze_excel(file):
-    # Find arknavne i filen
-    xls = pd.ExcelFile(file)
-    sheet_names = [s.lower() for s in xls.sheet_names]
+st.set_page_config(page_title="Acquisition Screening App", layout="wide")
+st.title("Acquisition Screening App")
 
-    # -------------------------
-    # CASE 1: RESIGHTS-DATA
-    # -------------------------
-    if "stamdata" in sheet_names and "enheder" in sheet_names:
-        df_stam = pd.read_excel(xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "stamdata"][0])
-        df_enh = pd.read_excel(xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "enheder"][0])
+# ----------------------------
+# Sidebar menu med knapper
+# ----------------------------
+st.sidebar.title("Moduler")
 
-        df_stam = df_stam[["Handels-ID", "Handelsdato", "Pris pr. m2 (enhedsareal)", "Enhedsareal"]]
-        df_enh = df_enh[["Handels-ID", "Antal værelser"]]
+if "selected_module" not in st.session_state:
+    st.session_state.selected_module = "📈 Excel-analyse (Resights / ReData)"
 
-        df = pd.merge(df_stam, df_enh, on="Handels-ID", how="left")
-        df = df.dropna(subset=["Handelsdato", "Pris pr. m2 (enhedsareal)", "Antal værelser", "Enhedsareal"])
-        df["Handelsdato"] = pd.to_datetime(df["Handelsdato"])
-        df["Antal værelser"] = df["Antal værelser"].astype(str)
-        df["År"] = df["Handelsdato"].dt.year
+if st.sidebar.button("📈 Excel-analyse (Resights / ReData)"):
+    st.session_state.selected_module = "📈 Excel-analyse (Resights / ReData)"
 
-        fig = px.scatter(
-            df,
-            x="Handelsdato",
-            y="Pris pr. m2 (enhedsareal)",
-            color="Antal værelser",
-            title="Pris pr. m² over tid – farvet efter antal værelser",
-            labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
-            hover_data=["Enhedsareal"],
-            trendline="lowess",
-            trendline_options=dict(frac=0.3)
-        )
+if st.sidebar.button("🧐 AI-analyse af lokalplan / kommuneplan"):
+    st.session_state.selected_module = "🧐 AI-analyse af lokalplan / kommuneplan"
 
-        total_avg = df["Pris pr. m2 (enhedsareal)"].mean()
-        avg_by_rooms = df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
+module = st.session_state.selected_module
 
-        bins = [0, 50, 75, 100, float("inf")]
-        labels = ["0–50 m²", "51–75 m²", "76–100 m²", "100+ m²"]
-        df["Størrelsessegment"] = pd.cut(df["Enhedsareal"], bins=bins, labels=labels)
-        avg_by_size = df.groupby("Størrelsessegment")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
+# ----------------------------
+# MODUL 1: EXCEL-ANALYSE
+# ----------------------------
+if module == "📈 Excel-analyse (Resights / ReData)":
+    st.header("📈 Analyse af Resights / ReData Excel-data")
+    st.write("Upload Excel-filer fra Resights – ejerboliger i fast format.")
 
-        avg_by_year = df.groupby("År")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
+    uploaded_file = st.file_uploader("Upload Excel-fil", type=["xlsx"])
 
-        return df, fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year
+    if uploaded_file:
+        try:
+            st.success("Fil uploadet – analyserer...")
+            df_full, fig_base, total_avg, avg_by_rooms, avg_by_size, avg_by_year = analyze_excel(uploaded_file)
 
-    # -------------------------
-    # CASE 2: REDATA-DATA
-    # -------------------------
-    elif "worksheet" in sheet_names:
-        df = pd.read_excel(xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "worksheet"][0])
+            # Filtrér år
+            available_years = sorted(df_full["År"].dropna().unique())
+            selected_years = st.multiselect("Vælg år", options=available_years, default=available_years)
 
-        df = df.dropna(subset=["Areal", "Leje/m2", "Antal værelser", "Opførelsesår"])
-        df["Antal værelser"] = df["Antal værelser"].astype(str)
-        df["Opførelsesår"] = df["Opførelsesår"].astype(int)
+            if selected_years:
+                df = df_full[df_full["År"].isin(selected_years)]
 
-        fig = px.scatter(
-            df,
-            x="Areal",
-            y="Leje/m2",
-            color="Antal værelser",
-            title="Leje pr. m² vs Areal – farvet efter antal værelser",
-            labels={"Leje/m2": "Leje pr. m²"},
-            hover_data=["Opførelsesår"],
-            trendline="lowess",
-            trendline_options=dict(frac=0.3)
-        )
+                # Opdater fig med filtreret data
+                import plotly.express as px
+                fig = px.scatter(
+                    df,
+                    x="Handelsdato",
+                    y="Pris pr. m2 (enhedsareal)",
+                    color="Antal værelser",
+                    title="Pris pr. m² over tid – farvet efter antal værelser",
+                    labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
+                    hover_data=["Enhedsareal"],
+                    trendline="lowess",
+                    trendline_options=dict(frac=0.3)
+                )
+                st.plotly_chart(fig, use_container_width=True)
 
-        total_avg = df["Leje/m2"].mean()
-        avg_by_rooms = df.groupby("Antal værelser")["Leje/m2"].mean().reset_index()
+                st.subheader("📊 Statistik")
+                st.metric("Gennemsnitlig pris pr. m² (alle boliger)", f"{df['Pris pr. m2 (enhedsareal)'].mean():,.0f} kr.")
 
-        bins = [0, 50, 75, 100, float("inf")]
-        labels = ["0–50 m²", "51–75 m²", "76–100 m²", "100+ m²"]
-        df["Størrelsessegment"] = pd.cut(df["Areal"], bins=bins, labels=labels)
-        avg_by_size = df.groupby("Størrelsessegment")["Leje/m2"].mean().reset_index()
+                st.markdown("**Gennemsnit pr. antal værelser:**")
+                st.dataframe(df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index(), use_container_width=True)
 
-        avg_by_year = df.groupby("Opførelsesår")["Leje/m2"].mean().reset_index()
+                bins = [0, 50, 75, 100, float("inf")]
+                labels = ["0–50 m²", "51–75 m²", "76–100 m²", "100+ m²"]
+                df["Størrelsessegment"] = pd.cut(df["Enhedsareal"], bins=bins, labels=labels)
+                avg_by_size = df.groupby("Størrelsessegment")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
-        return df, fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year
+                st.markdown("**Gennemsnit pr. størrelsessegment:**")
+                st.dataframe(avg_by_size, use_container_width=True)
 
-    else:
-        raise ValueError("Ukendt filformat – ingen gyldige ark fundet.")
+                avg_by_year = df.groupby("År")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
+                st.markdown("**Årlige gennemsnitspriser (filtreret):**")
+                st.dataframe(avg_by_year, use_container_width=True)
+            else:
+                st.warning("Vælg mindst ét år for at se analyserne.")
+        except Exception as e:
+            st.error(f"Fejl under Excel-analyse: {e}")
+
+# ----------------------------
+# MODUL 2: PDF-AI
+# ----------------------------
+elif module == "🧐 AI-analyse af lokalplan / kommuneplan":
+    st.header("🧐 Upload PDF for AI-analyse")
+    st.write("Upload en kommuneplan eller lokalplan i PDF-format og få en AI-opsummering.")
+
+    uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"])
+
+    if uploaded_pdf:
+        try:
+            from planning_ai.summarize_plans import summarize_pdf
+            st.success("PDF uploadet – analyserer...")
+            summary = summarize_pdf(uploaded_pdf)
+            st.markdown("### 🔎 AI-opsummering")
+            st.write(summary)
+        except Exception as e:
+            st.error(f"Fejl under PDF-analyse: {e}")
