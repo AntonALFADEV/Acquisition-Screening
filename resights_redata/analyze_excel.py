@@ -19,16 +19,21 @@ def analyze_excel(file):
         df["Antal værelser"] = df["Antal værelser"].astype(str)
         df["År"] = df["Handelsdato"].dt.year
 
+        # Konverter dato til tal til trendline
+        df["Handelsdato_numeric"] = df["Handelsdato"].map(pd.Timestamp.toordinal)
+
         fig = px.scatter(
             df,
-            x="Handelsdato",
+            x="Handelsdato_numeric",
             y="Pris pr. m2 (enhedsareal)",
             color="Antal værelser",
             title="Pris pr. m² over tid – farvet efter antal værelser",
             labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
-            hover_data=["Enhedsareal"],
+            hover_data={"Handelsdato": True, "Enhedsareal": True, "Handelsdato_numeric": False},
             trendline="ols",
         )
+
+        fig.update_layout(xaxis_title="Handelsdato")
 
         total_avg = df["Pris pr. m2 (enhedsareal)"].mean()
         avg_by_rooms = df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
@@ -44,5 +49,3 @@ def analyze_excel(file):
 
     else:
         raise ValueError("Excel-arket ser ikke ud til at komme fra Resights (mangler 'Stamdata' og 'Enheder').")
-
-
