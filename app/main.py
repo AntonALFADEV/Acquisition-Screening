@@ -3,6 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
+import pandas as pd
 from scraping.boligportal_scraper import fetch_boligportal
 from resights_redata.analyze_excel import analyze_excel
 
@@ -124,3 +125,4 @@ elif module == "🧠 AI-analyse af lokalplan / kommuneplan":
             st.write(summary)
         except Exception as e:
             st.error(f"Fejl under PDF-analyse: {e}")
+
