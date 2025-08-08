@@ -28,7 +28,6 @@ def analyze_excel(file):
             labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
             hover_data=["Enhedsareal"],
             trendline="ols",
-            trendline_options=dict(frac=0.3)
         )
 
         total_avg = df["Pris pr. m2 (enhedsareal)"].mean()
@@ -45,4 +44,5 @@ def analyze_excel(file):
 
     else:
         raise ValueError("Excel-arket ser ikke ud til at komme fra Resights (mangler 'Stamdata' og 'Enheder').")
+
 
