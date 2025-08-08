@@ -8,11 +8,11 @@ def analyze_excel(file):
 
     # Vælg relevante kolonner
     df_stam = df_stam[["Handels-ID", "Handelsdato", "Pris pr. m2 (enhedsareal)"]]
-    df_enh = df_enh[["Handels-ID", "Antal værelser", "Areal (enhed)"]]
+    df_enh = df_enh[["Handels-ID", "Antal værelser", "Enhedsareal"]]
 
     # Merge
     df = pd.merge(df_stam, df_enh, on="Handels-ID", how="left")
-    df = df.dropna(subset=["Handelsdato", "Pris pr. m2 (enhedsareal)", "Antal værelser", "Areal (enhed)"])
+    df = df.dropna(subset=["Handelsdato", "Pris pr. m2 (enhedsareal)", "Antal værelser", "Enhedsareal"])
     df["Handelsdato"] = pd.to_datetime(df["Handelsdato"])
     df["Antal værelser"] = df["Antal værelser"].astype(str)
     df["År"] = df["Handelsdato"].dt.year
@@ -25,7 +25,7 @@ def analyze_excel(file):
         color="Antal værelser",
         title="Pris pr. m² over tid – farvet efter antal værelser",
         labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
-        hover_data=["Areal (enhed)"],
+        hover_data=["Enhedsareal"],
         trendline="lowess",
         trendline_options=dict(frac=0.3)
     )
@@ -39,12 +39,11 @@ def analyze_excel(file):
     # Segmenter efter størrelse
     bins = [0, 50, 75, 100, float("inf")]
     labels = ["0–50 m²", "51–75 m²", "76–100 m²", "100+ m²"]
-    df["Størrelsessegment"] = pd.cut(df["Areal (enhed)"], bins=bins, labels=labels)
+    df["Størrelsessegment"] = pd.cut(df["Enhedsareal"], bins=bins, labels=labels)
 
     avg_by_size = df.groupby("Størrelsessegment")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
     # Gennemsnit pr. år
     avg_by_year = df.groupby("År")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
-    # Returner ALLE 5 ting
     return fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year
