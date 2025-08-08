@@ -25,7 +25,7 @@ def analyze_redata(file):
         title="Leje pr. m² vs Areal – farvet efter antal værelser",
         labels={"Leje/m2": "Leje pr. m²"},
         hover_data=["Opførelsesår"],
-        trendline="lowess",
+        trendline="ols",
         trendline_options=dict(frac=0.3)
     )
 
