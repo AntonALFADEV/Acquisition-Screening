@@ -17,34 +17,5 @@ def analyze_excel(file):
     df["Antal værelser"] = df["Antal værelser"].astype(str)
     df["År"] = df["Handelsdato"].dt.year
 
-    # Scatterplot med trendlinje
-    fig = px.scatter(
-        df,
-        x="Handelsdato",
-        y="Pris pr. m2 (enhedsareal)",
-        color="Antal værelser",
-        title="Pris pr. m² over tid – farvet efter antal værelser",
-        labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
-        hover_data=["Enhedsareal"],
-        trendline="lowess",
-        trendline_options=dict(frac=0.3)
-    )
-
-    # Gennemsnit
-    total_avg = df["Pris pr. m2 (enhedsareal)"].mean()
-
-    # Gennemsnit pr. værelser
-    avg_by_rooms = df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
-
-    # Segmenter efter størrelse
-    bins = [0, 50, 75, 100, float("inf")]
-    labels = ["0–50 m²", "51–75 m²", "76–100 m²", "100+ m²"]
-    df["Størrelsessegment"] = pd.cut(df["Enhedsareal"], bins=bins, labels=labels)
-
-    avg_by_size = df.groupby("Størrelsessegment")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
-
-    # Gennemsnit pr. år
-    avg_by_year = df.groupby("År")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
-
-    return fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year
-
+    # Returnér hele datasættet – analyserne laves i main.py
+    return df
