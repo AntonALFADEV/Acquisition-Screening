@@ -1,5 +1,6 @@
 import pandas as pd
 import plotly.express as px
+import streamlit as st
 
 def analyze_redata(file):
     # Læs ReData-arket (typisk navngivet "Worksheet")
@@ -16,6 +17,20 @@ def analyze_redata(file):
     df["Antal værelser"] = df["Antal værelser"].astype(str)
     df["Opførelsesår"] = df["Opførelsesår"].astype(int)
 
+    # 🎯 Filtrér på Opførelsesår
+    available_years = sorted(df["Opførelsesår"].unique())
+    selected_years = st.multiselect(
+        "Vælg opførelsesår der skal med i analysen",
+        options=available_years,
+        default=available_years
+    )
+
+    if not selected_years:
+        st.warning("Vælg mindst ét opførelsesår for at se analyserne.")
+        return None, None, None, None, None, None
+
+    df = df[df["Opførelsesår"].isin(selected_years)]
+
     # Scatterplot: Areal vs Leje/m2
     fig = px.scatter(
         df,
@@ -25,7 +40,7 @@ def analyze_redata(file):
         title="Leje pr. m² vs Areal – farvet efter antal værelser",
         labels={"Leje/m2": "Leje pr. m²"},
         hover_data=["Opførelsesår"],
-        trendline="ols",
+        trendline="ols",  # Lineær trendlinje
     )
 
     # Beregninger
