@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import streamlit as st
 import pandas as pd
 from resights_redata.analyze_excel import analyze_excel
+from resights_redata.analyze_redata import analyze_redata
 
 st.set_page_config(page_title="Acquisition Screening App", layout="wide")
 st.title("Acquisition Screening App")
@@ -20,19 +21,22 @@ if "selected_module" not in st.session_state:
 if st.sidebar.button("📈 Excel-analyse (Resights / ReData)"):
     st.session_state.selected_module = "📈 Excel-analyse (Resights / ReData)"
 
+if st.sidebar.button("📊 Excel-analyse (ReData – lejeniveauer)"):
+    st.session_state.selected_module = "📊 Excel-analyse (ReData – lejeniveauer)"
+
 if st.sidebar.button("🧐 AI-analyse af lokalplan / kommuneplan"):
     st.session_state.selected_module = "🧐 AI-analyse af lokalplan / kommuneplan"
 
 module = st.session_state.selected_module
 
 # ----------------------------
-# MODUL 1: EXCEL-ANALYSE
+# MODUL 1: EXCEL-ANALYSE RESIGHTS
 # ----------------------------
 if module == "📈 Excel-analyse (Resights / ReData)":
     st.header("📈 Analyse af Resights / ReData Excel-data")
     st.write("Upload Excel-filer fra Resights – ejerboliger i fast format.")
 
-    uploaded_file = st.file_uploader("Upload Excel-fil", type=["xlsx"])
+    uploaded_file = st.file_uploader("Upload Excel-fil", type=["xlsx"], key="resights")
 
     if uploaded_file:
         try:
@@ -46,7 +50,6 @@ if module == "📈 Excel-analyse (Resights / ReData)":
             if selected_years:
                 df = df_full[df_full["År"].isin(selected_years)]
 
-                # Opdater fig med filtreret data
                 import plotly.express as px
                 fig = px.scatter(
                     df,
@@ -84,7 +87,38 @@ if module == "📈 Excel-analyse (Resights / ReData)":
             st.error(f"Fejl under Excel-analyse: {e}")
 
 # ----------------------------
-# MODUL 2: PDF-AI
+# MODUL 2: EXCEL-ANALYSE REDATA
+# ----------------------------
+elif module == "📊 Excel-analyse (ReData – lejeniveauer)":
+    st.header("📊 Analyse af ReData-lejedata")
+    st.write("Upload Excel-fil fra ReData – lejeniveauer med kolonnerne 'Areal', 'Leje/m2', 'Antal værelser', og 'Opførelsesår'.")
+
+    uploaded_file = st.file_uploader("Upload ReData Excel-fil", type=["xlsx"], key="redata")
+
+    if uploaded_file:
+        try:
+            st.success("Fil uploadet – analyserer...")
+            df, fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year = analyze_redata(uploaded_file)
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.subheader("📊 Statistik")
+            st.metric("Gennemsnitlig leje pr. m²", f"{total_avg:,.0f} kr.")
+
+            st.markdown("**Gennemsnit pr. antal værelser:**")
+            st.dataframe(avg_by_rooms, use_container_width=True)
+
+            st.markdown("**Gennemsnit pr. størrelsessegment:**")
+            st.dataframe(avg_by_size, use_container_width=True)
+
+            st.markdown("**Gennemsnit pr. opførelsesår:**")
+            st.dataframe(avg_by_year, use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Fejl under ReData-analyse: {e}")
+
+# ----------------------------
+# MODUL 3: PDF-AI
 # ----------------------------
 elif module == "🧐 AI-analyse af lokalplan / kommuneplan":
     st.header("🧐 Upload PDF for AI-analyse")
