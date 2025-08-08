@@ -1,10 +1,10 @@
 import fitz  # PyMuPDF
 import openai
 import os
+import streamlit as st
 
-# Sørg for at have din OpenAI-nøgle som en environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
+# Hent API-nøgle fra Streamlit secrets
+client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def read_pdf_text(file):
     """Læs hele teksten fra en PDF ved brug af PyMuPDF"""
@@ -19,7 +19,7 @@ def summarize_pdf(file):
     """AI-baseret opsummering af PDF med OpenAI's GPT-4"""
     raw_text = read_pdf_text(file)
 
-    # Evt. klip meget lange PDF'er ned for at spare tokens
+    # Trim lange PDF'er ned
     max_chars = 8000
     trimmed_text = raw_text[:max_chars]
 
@@ -37,17 +37,15 @@ Tekst:
 """
 
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-4",  # eller "gpt-3.5-turbo"
             messages=[
                 {"role": "system", "content": "Du er ekspert i byplanlægning og lokalplaner."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3
         )
-
-        summary = response.choices[0].message.content
-        return summary
+        return response.choices[0].message.content.strip()
 
     except Exception as e:
         return f"Fejl i AI-analyse: {e}"
