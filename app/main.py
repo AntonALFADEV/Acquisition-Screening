@@ -58,8 +58,7 @@ if module == "🏠 Ejerboligpriser":
                     title="Pris pr. m² over tid – farvet efter antal værelser",
                     labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
                     hover_data=["Enhedsareal"],
-                    trendline="lowess",
-                    trendline_options=dict(frac=0.3)
+                    trendline="ols"
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
@@ -99,20 +98,20 @@ elif module == "🏢 Lejeboligpriser":
             st.success("Fil uploadet – analyserer...")
             df, fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year = analyze_redata(uploaded_file)
 
-            st.plotly_chart(fig, use_container_width=True)
+            if df is not None:
+                st.plotly_chart(fig, use_container_width=True)
 
-            st.subheader("📊 Statistik")
-            st.metric("Gennemsnitlig leje pr. m²", f"{total_avg:,.0f} kr.")
+                st.subheader("📊 Statistik")
+                st.metric("Gennemsnitlig leje pr. m²", f"{total_avg:,.0f} kr.")
 
-            st.markdown("**Gennemsnit pr. antal værelser:**")
-            st.dataframe(avg_by_rooms, use_container_width=True)
+                st.markdown("**Gennemsnit pr. antal værelser:**")
+                st.dataframe(avg_by_rooms, use_container_width=True)
 
-            st.markdown("**Gennemsnit pr. størrelsessegment:**")
-            st.dataframe(avg_by_size, use_container_width=True)
+                st.markdown("**Gennemsnit pr. størrelsessegment:**")
+                st.dataframe(avg_by_size, use_container_width=True)
 
-            st.markdown("**Gennemsnit pr. opførelsesår:**")
-            st.dataframe(avg_by_year, use_container_width=True)
-
+                st.markdown("**Gennemsnit pr. opførelsesår:**")
+                st.dataframe(avg_by_year, use_container_width=True)
         except Exception as e:
             st.error(f"Fejl under ReData-analyse: {e}")
 
