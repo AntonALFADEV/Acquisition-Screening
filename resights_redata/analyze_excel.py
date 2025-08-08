@@ -2,16 +2,16 @@ import pandas as pd
 import plotly.express as px
 
 def analyze_excel(file):
-    # Hent ark-navne
+    # Find arknavne i filen
     xls = pd.ExcelFile(file)
-    sheet_names = xls.sheet_names
+    sheet_names = [s.lower() for s in xls.sheet_names]
 
     # -------------------------
     # CASE 1: RESIGHTS-DATA
     # -------------------------
-    if "Stamdata" in sheet_names and "Enheder" in sheet_names:
-        df_stam = pd.read_excel(file, sheet_name="Stamdata")
-        df_enh = pd.read_excel(file, sheet_name="Enheder")
+    if "stamdata" in sheet_names and "enheder" in sheet_names:
+        df_stam = pd.read_excel(xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "stamdata"][0])
+        df_enh = pd.read_excel(xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "enheder"][0])
 
         df_stam = df_stam[["Handels-ID", "Handelsdato", "Pris pr. m2 (enhedsareal)", "Enhedsareal"]]
         df_enh = df_enh[["Handels-ID", "Antal værelser"]]
@@ -22,7 +22,6 @@ def analyze_excel(file):
         df["Antal værelser"] = df["Antal værelser"].astype(str)
         df["År"] = df["Handelsdato"].dt.year
 
-        # Scatterplot
         fig = px.scatter(
             df,
             x="Handelsdato",
@@ -50,13 +49,13 @@ def analyze_excel(file):
     # -------------------------
     # CASE 2: REDATA-DATA
     # -------------------------
-    elif "Worksheet" in sheet_names:
-        df = pd.read_excel(file, sheet_name="Worksheet")
+    elif "worksheet" in sheet_names:
+        df = pd.read_excel(xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "worksheet"][0])
+
         df = df.dropna(subset=["Areal", "Leje/m2", "Antal værelser", "Opførelsesår"])
         df["Antal værelser"] = df["Antal værelser"].astype(str)
         df["Opførelsesår"] = df["Opførelsesår"].astype(int)
 
-        # Scatterplot
         fig = px.scatter(
             df,
             x="Areal",
@@ -82,4 +81,4 @@ def analyze_excel(file):
         return df, fig, total_avg, avg_by_rooms, avg_by_size, avg_by_year
 
     else:
-        raise ValueError("Ukendt filformat – kunne ikke finde relevante ark.")
+        raise ValueError("Ukendt filformat – ingen gyldige ark fundet.")
