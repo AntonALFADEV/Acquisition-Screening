@@ -24,9 +24,6 @@ if st.sidebar.button("🏠 Ejerboligpriser"):
 if st.sidebar.button("🏢 Lejeboligpriser"):
     st.session_state.selected_module = "🏢 Lejeboligpriser"
 
-if st.sidebar.button("🧐 AI-analyse af lokalplan / kommuneplan"):
-    st.session_state.selected_module = "🧐 AI-analyse af lokalplan / kommuneplan"
-
 module = st.session_state.selected_module
 
 # ----------------------------
@@ -123,21 +120,4 @@ elif module == "🏢 Lejeboligpriser":
         except Exception as e:
             st.error(f"Fejl under ReData-analyse: {e}")
 
-# ----------------------------
-# MODUL 3: PDF-AI
-# ----------------------------
-elif module == "🧐 AI-analyse af lokalplan / kommuneplan":
-    st.header("🧐 Upload PDF for AI-analyse")
-    st.write("Upload en kommuneplan eller lokalplan i PDF-format og få en AI-opsummering.")
 
-    uploaded_pdf = st.file_uploader("Upload PDF", type=["pdf"], key="pdf")
-
-    if uploaded_pdf:
-        try:
-            from planning_ai.summarize_plans import summarize_pdf
-            st.success("PDF uploadet – analyserer...")
-            summary = summarize_pdf(uploaded_pdf)
-            st.markdown("### 🔎 AI-opsummering")
-            st.write(summary)
-        except Exception as e:
-            st.error(f"Fejl under PDF-analyse: {e}")
