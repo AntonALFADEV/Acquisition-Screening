@@ -4,6 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 from resights_redata.analyze_excel import analyze_excel
 from resights_redata.analyze_redata import analyze_redata
 
@@ -46,10 +47,10 @@ if module == "🏠 Ejerboligpriser":
             if selected_years:
                 df = df_full[df_full["År"].isin(selected_years)]
 
-                import plotly.express as px
+                # Scatterplot med OLS-trendlinje
                 fig = px.scatter(
                     df,
-                    x="Handelsdato_numeric",  # brug den numeriske dato der laves i analyze_excel
+                    x="Handelsdato_numeric",
                     y="Pris pr. m2 (enhedsareal)",
                     color="Antal værelser",
                     title="Pris pr. m² over tid – farvet efter antal værelser",
@@ -57,12 +58,27 @@ if module == "🏠 Ejerboligpriser":
                     hover_data={"Handelsdato": True, "Enhedsareal": True, "Handelsdato_numeric": False},
                     trendline="ols"
                 )
-                # Vis “rigtig” aksetekst
                 fig.update_layout(xaxis_title="Handelsdato")
                 st.plotly_chart(fig, use_container_width=True)
 
-                # 👉 Antal observationer (punkter i plottet)
+                # 👉 Antal observationer
                 st.metric("Antal observationer", f"{len(df)}")
+
+                # 👉 Kort over boliger (hvis koordinater findes)
+                if "Longitude" in df.columns and "Latitude" in df.columns:
+                    st.subheader("🗺️ Kort over boliger")
+                    map_fig = px.scatter_mapbox(
+                        df,
+                        lat="Latitude",
+                        lon="Longitude",
+                        color="Antal værelser",
+                        size_max=10,
+                        zoom=8,
+                        hover_name="Handels-ID",
+                        hover_data={"Pris pr. m2 (enhedsareal)": True, "Enhedsareal": True, "Longitude": False, "Latitude": False}
+                    )
+                    map_fig.update_layout(mapbox_style="open-street-map")
+                    st.plotly_chart(map_fig, use_container_width=True)
 
                 st.subheader("📊 Statistik")
                 st.metric("Gennemsnitlig pris pr. m² (alle boliger)", f"{df['Pris pr. m2 (enhedsareal)'].mean():,.0f} kr.")
@@ -102,8 +118,6 @@ elif module == "🏢 Lejeboligpriser":
 
             if df is not None:
                 st.plotly_chart(fig, use_container_width=True)
-
-                # 👉 Antal observationer (punkter i plottet)
                 st.metric("Antal observationer", f"{len(df)}")
 
                 st.subheader("📊 Statistik")
