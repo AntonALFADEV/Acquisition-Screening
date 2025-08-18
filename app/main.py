@@ -52,15 +52,20 @@ if module == "🏠 Ejerboligpriser":
                 import plotly.express as px
                 fig = px.scatter(
                     df,
-                    x="Handelsdato",
+                    x="Handelsdato_numeric",  # brug den numeriske dato der laves i analyze_excel
                     y="Pris pr. m2 (enhedsareal)",
                     color="Antal værelser",
                     title="Pris pr. m² over tid – farvet efter antal værelser",
                     labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
-                    hover_data=["Enhedsareal"],
+                    hover_data={"Handelsdato": True, "Enhedsareal": True, "Handelsdato_numeric": False},
                     trendline="ols"
                 )
+                # Vis “rigtig” aksetekst
+                fig.update_layout(xaxis_title="Handelsdato")
                 st.plotly_chart(fig, use_container_width=True)
+
+                # 👉 Antal observationer (punkter i plottet)
+                st.metric("Antal observationer", f"{len(df)}")
 
                 st.subheader("📊 Statistik")
                 st.metric("Gennemsnitlig pris pr. m² (alle boliger)", f"{df['Pris pr. m2 (enhedsareal)'].mean():,.0f} kr.")
@@ -100,6 +105,9 @@ elif module == "🏢 Lejeboligpriser":
 
             if df is not None:
                 st.plotly_chart(fig, use_container_width=True)
+
+                # 👉 Antal observationer (punkter i plottet)
+                st.metric("Antal observationer", f"{len(df)}")
 
                 st.subheader("📊 Statistik")
                 st.metric("Gennemsnitlig leje pr. m²", f"{total_avg:,.0f} kr.")
