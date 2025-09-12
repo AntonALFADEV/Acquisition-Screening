@@ -24,7 +24,7 @@ def analyze_excel(file):
 
         fig = px.scatter(
             df,
-            x="Handelsdato_numeric",
+            x="Handelsdato",
             y="Pris pr. m2 (enhedsareal)",
             color="Antal værelser",
             title="Pris pr. m² over tid – farvet efter antal værelser",
@@ -49,3 +49,4 @@ def analyze_excel(file):
 
     else:
         raise ValueError("Excel-arket ser ikke ud til at komme fra Resights (mangler 'Stamdata' og 'Enheder').")
+
