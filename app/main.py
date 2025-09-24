@@ -42,7 +42,7 @@ if module == "🏠 Ejerboligpriser":
             df_full, fig_base, total_avg, avg_by_rooms, avg_by_size, avg_by_year = analyze_excel(uploaded_file)
 
             available_years = sorted(df_full["År"].dropna().unique())
-            selected_years = st.multiselect("Vælg år", options=available_years, default=available_years)
+            selected_years = st.multiselect("Vælg handelsår", options=available_years, default=available_years)
 
             if selected_years:
                 df = df_full[df_full["År"].isin(selected_years)]
@@ -52,10 +52,10 @@ if module == "🏠 Ejerboligpriser":
                     "#b27b5c",
                     "#6b635d",
                     "#536a5e",
-                    "#577a84",
                     "#fac0a7",
                     "#b27b5c",
-                    "#0f5c55"
+                    "#0f5c55",
+                    "#577a84"
                 ]
 
                 # Scatterplot med OLS-trendlinje
@@ -154,3 +154,4 @@ elif module == "🏢 Lejeboligpriser":
                 st.dataframe(avg_by_year, use_container_width=True)
         except Exception as e:
             st.error(f"Fejl under ReData-analyse: {e}")
+
