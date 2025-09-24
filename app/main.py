@@ -47,18 +47,21 @@ if module == "🏠 Ejerboligpriser":
             if selected_years:
                 df = df_full[df_full["År"].isin(selected_years)]
 
-                # Dine faste farver
-                custom_colors = [
-    "#b27b5c",  # varm sand / terracotta
-    "#8c5a44",  # dyb brunlig rød (mere markant end grå)
-    "#4f6d49",  # olivengrøn (erstatter den grågrønne)
-    "#577a84",  # støvet blågrøn
-    "#fac0a7",  # lys fersken / pastel
-    "#d4a373",  # varm beige (erstatter den anden grålige)
-    "#0f5c55"   # dyb turkisgrøn
-]
+                # Checkbox i sidebaren for trendlinje
+                show_trendline = st.sidebar.checkbox("Vis trendlinje", value=True)
 
-                # Scatterplot med OLS-trendlinje
+                # Jordtone-farver
+                custom_colors = [
+                    "#b27b5c",  # varm sand / terracotta
+                    "#8c5a44",  # dyb brunlig rød
+                    "#4f6d49",  # olivengrøn
+                    "#577a84",  # støvet blågrøn
+                    "#fac0a7",  # lys fersken / pastel
+                    "#d4a373",  # varm beige
+                    "#0f5c55"   # dyb turkisgrøn
+                ]
+
+                # Scatterplot
                 fig = px.scatter(
                     df,
                     x="Handelsdato",
@@ -67,8 +70,8 @@ if module == "🏠 Ejerboligpriser":
                     title="Pris pr. m² over tid – farvet efter antal værelser",
                     labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
                     hover_data={"Handelsdato": True, "Enhedsareal": True},
-                    trendline="ols",
-                    color_discrete_sequence=custom_colors  # 👈 dine farver
+                    trendline="ols" if show_trendline else None,
+                    color_discrete_sequence=custom_colors
                 )
                 fig.update_layout(xaxis_title="Handelsdato")
                 st.plotly_chart(fig, use_container_width=True)
@@ -93,7 +96,7 @@ if module == "🏠 Ejerboligpriser":
                             "Longitude": False,
                             "Latitude": False
                         },
-                        color_discrete_sequence=custom_colors  # 👈 samme farver på kortet
+                        color_discrete_sequence=custom_colors
                     )
                     map_fig.update_layout(mapbox_style="open-street-map")
                     st.plotly_chart(map_fig, use_container_width=True)
@@ -154,5 +157,3 @@ elif module == "🏢 Lejeboligpriser":
                 st.dataframe(avg_by_year, use_container_width=True)
         except Exception as e:
             st.error(f"Fejl under ReData-analyse: {e}")
-
-
