@@ -18,18 +18,22 @@ def analyze_excel(file):
         df_enh = df_enh[["Handels-ID", "Antal værelser"]]
 
         df = pd.merge(df_stam, df_enh, on="Handels-ID", how="left")
-        df = df.dropna(subset=["Handelsdato", "Pris pr. m2 (enhedsareal)", "Antal værelser", "Enhedsareal"])
 
-        # --- Fix Handelsdato ---
+        # --- Robust konvertering af Handelsdato ---
+        # Excel-datoer kan komme som tal (antal dage siden 1899-12-30) eller som tekst
         if pd.api.types.is_numeric_dtype(df["Handelsdato"]):
             df["Handelsdato"] = pd.to_datetime(df["Handelsdato"], origin="1899-12-30", unit="D")
         else:
             df["Handelsdato"] = pd.to_datetime(df["Handelsdato"], errors="coerce")
 
+        # Rens efter konvertering
+        df = df.dropna(subset=["Handelsdato", "Pris pr. m2 (enhedsareal)", "Antal værelser", "Enhedsareal"])
+
+        # Datatyper
         df["Antal værelser"] = df["Antal værelser"].astype(str)
         df["År"] = df["Handelsdato"].dt.year
 
-        # Scatterplot med dato direkte på x-aksen
+        # Scatter: brug den rigtige datokolonne direkte
         fig = px.scatter(
             df,
             x="Handelsdato",
@@ -40,10 +44,10 @@ def analyze_excel(file):
             hover_data={"Handelsdato": True, "Enhedsareal": True},
             trendline="ols",
         )
-
         fig.update_layout(xaxis_title="Handelsdato")
+        fig.update_xaxes(type="date")
 
-        # Beregninger
+        # Aggregater
         total_avg = df["Pris pr. m2 (enhedsareal)"].mean()
         avg_by_rooms = df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
@@ -58,3 +62,4 @@ def analyze_excel(file):
 
     else:
         raise ValueError("Excel-arket ser ikke ud til at komme fra Resights (mangler 'Stamdata' og 'Enheder').")
+
