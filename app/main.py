@@ -47,16 +47,28 @@ if module == "🏠 Ejerboligpriser":
             if selected_years:
                 df = df_full[df_full["År"].isin(selected_years)]
 
+                # Dine faste farver
+                custom_colors = [
+                    "#b27b5c",
+                    "#6b635d",
+                    "#536a5e",
+                    "#577a84",
+                    "#fac0a7",
+                    "#b27b5c",
+                    "#0f5c55"
+                ]
+
                 # Scatterplot med OLS-trendlinje
                 fig = px.scatter(
                     df,
-                    x="Handelsdato",  # <-- rettet fra Handelsdato_numeric
+                    x="Handelsdato",
                     y="Pris pr. m2 (enhedsareal)",
                     color="Antal værelser",
                     title="Pris pr. m² over tid – farvet efter antal værelser",
                     labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
                     hover_data={"Handelsdato": True, "Enhedsareal": True},
-                    trendline="ols"
+                    trendline="ols",
+                    color_discrete_sequence=custom_colors  # 👈 dine farver
                 )
                 fig.update_layout(xaxis_title="Handelsdato")
                 st.plotly_chart(fig, use_container_width=True)
@@ -80,7 +92,8 @@ if module == "🏠 Ejerboligpriser":
                             "Enhedsareal": True,
                             "Longitude": False,
                             "Latitude": False
-                        }
+                        },
+                        color_discrete_sequence=custom_colors  # 👈 samme farver på kortet
                     )
                     map_fig.update_layout(mapbox_style="open-street-map")
                     st.plotly_chart(map_fig, use_container_width=True)
@@ -89,7 +102,10 @@ if module == "🏠 Ejerboligpriser":
                 st.metric("Gennemsnitlig pris pr. m² (alle boliger)", f"{df['Pris pr. m2 (enhedsareal)'].mean():,.0f} kr.")
 
                 st.markdown("**Gennemsnit pr. antal værelser:**")
-                st.dataframe(df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index(), use_container_width=True)
+                st.dataframe(
+                    df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index(),
+                    use_container_width=True
+                )
 
                 bins = [0, 50, 75, 100, float("inf")]
                 labels = ["0–50 m²", "51–75 m²", "76–100 m²", "100+ m²"]
@@ -138,4 +154,3 @@ elif module == "🏢 Lejeboligpriser":
                 st.dataframe(avg_by_year, use_container_width=True)
         except Exception as e:
             st.error(f"Fejl under ReData-analyse: {e}")
-
