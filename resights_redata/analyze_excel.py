@@ -7,8 +7,12 @@ def analyze_excel(file):
     sheet_names = [s.lower() for s in xls.sheet_names]
 
     if "stamdata" in sheet_names and "enheder" in sheet_names:
-        df_stam = pd.read_excel(xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "stamdata"][0])
-        df_enh = pd.read_excel(xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "enheder"][0])
+        df_stam = pd.read_excel(
+            xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "stamdata"][0]
+        )
+        df_enh = pd.read_excel(
+            xls, sheet_name=[s for s in xls.sheet_names if s.lower() == "enheder"][0]
+        )
 
         df_stam = df_stam[["Handels-ID", "Handelsdato", "Pris pr. m2 (enhedsareal)", "Enhedsareal"]]
         df_enh = df_enh[["Handels-ID", "Antal værelser"]]
@@ -19,22 +23,21 @@ def analyze_excel(file):
         df["Antal værelser"] = df["Antal værelser"].astype(str)
         df["År"] = df["Handelsdato"].dt.year
 
-        # Konverter dato til tal til trendline
-        df["Handelsdato_numeric"] = df["Handelsdato"].map(pd.Timestamp.toordinal)
-
+        # Scatterplot med dato direkte på x-aksen
         fig = px.scatter(
             df,
-            x="Handelsdato_numeric",
+            x="Handelsdato",
             y="Pris pr. m2 (enhedsareal)",
             color="Antal værelser",
             title="Pris pr. m² over tid – farvet efter antal værelser",
             labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
-            hover_data={"Handelsdato": True, "Enhedsareal": True, "Handelsdato_numeric": False},
-            trendline="ols",
+            hover_data={"Handelsdato": True, "Enhedsareal": True},
+            trendline="ols",  # Plotly kan stadig lave regression på datotid
         )
 
         fig.update_layout(xaxis_title="Handelsdato")
 
+        # Beregninger
         total_avg = df["Pris pr. m2 (enhedsareal)"].mean()
         avg_by_rooms = df.groupby("Antal værelser")["Pris pr. m2 (enhedsareal)"].mean().reset_index()
 
@@ -49,5 +52,3 @@ def analyze_excel(file):
 
     else:
         raise ValueError("Excel-arket ser ikke ud til at komme fra Resights (mangler 'Stamdata' og 'Enheder').")
-
-
