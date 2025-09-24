@@ -50,12 +50,12 @@ if module == "🏠 Ejerboligpriser":
                 # Scatterplot med OLS-trendlinje
                 fig = px.scatter(
                     df,
-                    x="Handelsdato_numeric",
+                    x="Handelsdato",  # <-- rettet fra Handelsdato_numeric
                     y="Pris pr. m2 (enhedsareal)",
                     color="Antal værelser",
                     title="Pris pr. m² over tid – farvet efter antal værelser",
                     labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
-                    hover_data={"Handelsdato": True, "Enhedsareal": True, "Handelsdato_numeric": False},
+                    hover_data={"Handelsdato": True, "Enhedsareal": True},
                     trendline="ols"
                 )
                 fig.update_layout(xaxis_title="Handelsdato")
@@ -75,7 +75,12 @@ if module == "🏠 Ejerboligpriser":
                         size_max=10,
                         zoom=8,
                         hover_name="Handels-ID",
-                        hover_data={"Pris pr. m2 (enhedsareal)": True, "Enhedsareal": True, "Longitude": False, "Latitude": False}
+                        hover_data={
+                            "Pris pr. m2 (enhedsareal)": True,
+                            "Enhedsareal": True,
+                            "Longitude": False,
+                            "Latitude": False
+                        }
                     )
                     map_fig.update_layout(mapbox_style="open-street-map")
                     st.plotly_chart(map_fig, use_container_width=True)
@@ -133,5 +138,4 @@ elif module == "🏢 Lejeboligpriser":
                 st.dataframe(avg_by_year, use_container_width=True)
         except Exception as e:
             st.error(f"Fejl under ReData-analyse: {e}")
-
 
