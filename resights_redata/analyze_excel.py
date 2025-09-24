@@ -19,7 +19,13 @@ def analyze_excel(file):
 
         df = pd.merge(df_stam, df_enh, on="Handels-ID", how="left")
         df = df.dropna(subset=["Handelsdato", "Pris pr. m2 (enhedsareal)", "Antal værelser", "Enhedsareal"])
-        df["Handelsdato"] = pd.to_datetime(df["Handelsdato"])
+
+        # --- Fix Handelsdato ---
+        if pd.api.types.is_numeric_dtype(df["Handelsdato"]):
+            df["Handelsdato"] = pd.to_datetime(df["Handelsdato"], origin="1899-12-30", unit="D")
+        else:
+            df["Handelsdato"] = pd.to_datetime(df["Handelsdato"], errors="coerce")
+
         df["Antal værelser"] = df["Antal værelser"].astype(str)
         df["År"] = df["Handelsdato"].dt.year
 
@@ -32,7 +38,7 @@ def analyze_excel(file):
             title="Pris pr. m² over tid – farvet efter antal værelser",
             labels={"Pris pr. m2 (enhedsareal)": "Pris pr. m²"},
             hover_data={"Handelsdato": True, "Enhedsareal": True},
-            trendline="ols",  # Plotly kan stadig lave regression på datotid
+            trendline="ols",
         )
 
         fig.update_layout(xaxis_title="Handelsdato")
