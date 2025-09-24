@@ -49,14 +49,14 @@ if module == "🏠 Ejerboligpriser":
 
                 # Dine faste farver
                 custom_colors = [
-                    "#b27b5c",
-                    "#6b635d",
-                    "#536a5e",
-                    "#fac0a7",
-                    "#b27b5c",
-                    "#0f5c55",
-                    "#577a84"
-                ]
+    "#b27b5c",  # varm sand / terracotta
+    "#8c5a44",  # dyb brunlig rød (mere markant end grå)
+    "#4f6d49",  # olivengrøn (erstatter den grågrønne)
+    "#577a84",  # støvet blågrøn
+    "#fac0a7",  # lys fersken / pastel
+    "#d4a373",  # varm beige (erstatter den anden grålige)
+    "#0f5c55"   # dyb turkisgrøn
+]
 
                 # Scatterplot med OLS-trendlinje
                 fig = px.scatter(
@@ -154,4 +154,5 @@ elif module == "🏢 Lejeboligpriser":
                 st.dataframe(avg_by_year, use_container_width=True)
         except Exception as e:
             st.error(f"Fejl under ReData-analyse: {e}")
+
 
